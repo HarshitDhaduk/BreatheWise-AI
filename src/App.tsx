@@ -1,13 +1,10 @@
 import { useState, useEffect } from 'react';
 import { 
   CloudFog, 
-  CalendarClock, 
-  Wrench, 
-  HeartPulse, 
-  Users, 
   Bot, 
-  Github,
-  RefreshCw
+  Github, 
+  RefreshCw, 
+  Sparkles 
 } from 'lucide-react';
 
 import { AirQualityMetrics, InversionRisk, DiurnalPoint, UserContext } from './types';
@@ -16,14 +13,15 @@ import { analyzeThermalInversion } from './utils/inversionEngine';
 
 import { Header } from './components/Header';
 import { SmogDashboard } from './components/SmogDashboard';
-import { RoutineOptimizer } from './components/RoutineOptimizer';
-import { IAQLab } from './components/IAQLab';
-import { ImpactDashboard } from './components/ImpactDashboard';
+import { ActionMatrix } from './components/ActionMatrix';
+import { DayScrubber } from './components/DayScrubber';
+import { RoomSimulator } from './components/RoomSimulator';
+import { CommuteSimulator } from './components/CommuteSimulator';
 import { CommunityHub } from './components/CommunityHub';
-import { GenAICopilot } from './components/GenAICopilot';
 import { EmergencySmogBanner } from './components/EmergencySmogBanner';
 import { FamilyProfileModal } from './components/FamilyProfileModal';
 import { SettingsModal } from './components/SettingsModal';
+import { CopilotDrawer } from './components/CopilotDrawer';
 
 const DEFAULT_USER_CONTEXT: UserContext = {
   family: {
@@ -57,8 +55,12 @@ export function App() {
   const [inversion, setInversion] = useState<InversionRisk | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'routine' | 'iaq_lab' | 'impact' | 'community' | 'copilot'>('dashboard');
+  // Active section view mode for smooth navigation
+  const [activeSection, setActiveSection] = useState<'all' | 'actions' | 'rooms' | 'commute' | 'community'>('all');
   const [emergencyMode, setEmergencyMode] = useState(false);
+  
+  // Copilot drawer state
+  const [isCopilotOpen, setIsCopilotOpen] = useState(false);
   const [copilotQuery, setCopilotQuery] = useState<string>('');
 
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -125,7 +127,7 @@ export function App() {
 
   const handleOpenCopilotWithQuery = (query: string) => {
     setCopilotQuery(query);
-    setActiveTab('copilot');
+    setIsCopilotOpen(true);
   };
 
   if (!metrics || !inversion) {
@@ -143,8 +145,10 @@ export function App() {
     );
   }
 
+  const currentHour = new Date().getHours();
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col selection:bg-teal-500 selection:text-white">
       {/* Header */}
       <Header
         metrics={metrics}
@@ -159,12 +163,14 @@ export function App() {
 
       {/* Main Container */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full space-y-6">
+        {/* Loading Indicator */}
         {loading && (
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-teal-500/10 border border-teal-500/20 text-xs text-teal-300">
             <RefreshCw className="w-3.5 h-3.5 animate-spin" />
             <span>Updating real-time inversion & AQI feeds...</span>
           </div>
         )}
+
         {/* Severe Smog Emergency Lockdown Banner */}
         {emergencyMode && (
           <EmergencySmogBanner
@@ -174,130 +180,164 @@ export function App() {
           />
         )}
 
-        {/* Navigation Tabs Bar */}
-        <nav 
-          aria-label="Main Navigation"
-          className="flex items-center gap-1.5 sm:gap-2 p-1.5 bg-slate-900 border border-slate-800 rounded-2xl overflow-x-auto no-scrollbar shadow-lg"
-        >
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
-              activeTab === 'dashboard'
-                ? 'bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
-            }`}
-          >
-            <CloudFog className="w-4 h-4" />
-            <span>Smog & Inversion</span>
-          </button>
+        {/* Live Smog & Inversion Overview */}
+        <SmogDashboard
+          metrics={metrics}
+          inversion={inversion}
+          diurnal={diurnal}
+          onOpenIAQHacks={() => setActiveSection('rooms')}
+          onOpenCopilot={handleOpenCopilotWithQuery}
+        />
+
+        {/* Focus Navigation Bar (Lets user filter or view all seamlessly) */}
+        <div className="flex items-center justify-between gap-3 p-2 rounded-2xl bg-slate-900 border border-slate-800">
+          <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+            <button
+              onClick={() => setActiveSection('all')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+                activeSection === 'all'
+                  ? 'bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              Full Daily Copilot
+            </button>
+            <button
+              onClick={() => setActiveSection('actions')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+                activeSection === 'actions'
+                  ? 'bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              Decision Matrix
+            </button>
+            <button
+              onClick={() => setActiveSection('rooms')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+                activeSection === 'rooms'
+                  ? 'bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              Home Air Defense Lab
+            </button>
+            <button
+              onClick={() => setActiveSection('commute')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+                activeSection === 'commute'
+                  ? 'bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              Commute Optimizer
+            </button>
+            <button
+              onClick={() => setActiveSection('community')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
+                activeSection === 'community'
+                  ? 'bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              Community Pledges
+            </button>
+          </div>
 
           <button
-            onClick={() => setActiveTab('routine')}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
-              activeTab === 'routine'
-                ? 'bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
-            }`}
+            onClick={() => setIsCopilotOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-teal-500/10 hover:bg-teal-500/20 border border-teal-500/30 text-teal-300 text-xs font-bold transition shrink-0"
           >
-            <CalendarClock className="w-4 h-4" />
-            <span>Daily Routines</span>
+            <Sparkles className="w-3.5 h-3.5 text-teal-400" />
+            <span className="hidden sm:inline">Ask Copilot</span>
           </button>
+        </div>
 
-          <button
-            onClick={() => setActiveTab('iaq_lab')}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
-              activeTab === 'iaq_lab'
-                ? 'bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
-            }`}
-          >
-            <Wrench className="w-4 h-4" />
-            <span>Indoor Hacks & Lab</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('impact')}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
-              activeTab === 'impact'
-                ? 'bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
-            }`}
-          >
-            <HeartPulse className="w-4 h-4" />
-            <span>Impact & Savings</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('community')}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
-              activeTab === 'community'
-                ? 'bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
-            }`}
-          >
-            <Users className="w-4 h-4" />
-            <span>Community Hub</span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('copilot')}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-2.5 rounded-xl text-xs font-bold transition whitespace-nowrap ml-auto ${
-              activeTab === 'copilot'
-                ? 'bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20'
-                : 'bg-teal-500/10 text-teal-300 hover:bg-teal-500/20 border border-teal-500/20'
-            }`}
-          >
-            <Bot className="w-4 h-4" />
-            <span>GenAI Copilot</span>
-          </button>
-        </nav>
-
-        {/* Tab Views */}
-        {activeTab === 'dashboard' && (
-          <SmogDashboard
+        {/* Section 1: "What Can I Do Right Now?" Action Matrix */}
+        {(activeSection === 'all' || activeSection === 'actions') && (
+          <ActionMatrix
             metrics={metrics}
             inversion={inversion}
+            userContext={userContext}
+            onOpenCopilot={handleOpenCopilotWithQuery}
+          />
+        )}
+
+        {/* Section 2: 24-Hour Diurnal Inversion Scrubber */}
+        {(activeSection === 'all' || activeSection === 'actions') && (
+          <DayScrubber
             diurnal={diurnal}
-            onOpenIAQHacks={() => setActiveTab('iaq_lab')}
+            currentHour={currentHour}
             onOpenCopilot={handleOpenCopilotWithQuery}
           />
         )}
 
-        {activeTab === 'routine' && (
-          <RoutineOptimizer
-            userContext={userContext}
+        {/* Section 3: Room-by-Room Home Air Defense Simulator */}
+        {(activeSection === 'all' || activeSection === 'rooms') && (
+          <RoomSimulator
             metrics={metrics}
             onOpenCopilot={handleOpenCopilotWithQuery}
           />
         )}
 
-        {activeTab === 'iaq_lab' && (
-          <IAQLab onOpenCopilot={handleOpenCopilotWithQuery} />
-        )}
-
-        {activeTab === 'impact' && (
-          <ImpactDashboard
-            userContext={userContext}
+        {/* Section 4: Commute Modal Shift & Route Optimizer */}
+        {(activeSection === 'all' || activeSection === 'commute') && (
+          <CommuteSimulator
             metrics={metrics}
+            commute={userContext.commute}
+            onUpdateCommute={(c) => handleSaveContext({ ...userContext, commute: c })}
             onOpenCopilot={handleOpenCopilotWithQuery}
           />
         )}
 
-        {activeTab === 'community' && (
+        {/* Section 5: Community Airshed & Pledges */}
+        {(activeSection === 'all' || activeSection === 'community') && (
           <CommunityHub onOpenCopilot={handleOpenCopilotWithQuery} />
         )}
-
-        {activeTab === 'copilot' && (
-          <GenAICopilot
-            metrics={metrics}
-            inversion={inversion}
-            userContext={userContext}
-            apiKey={geminiApiKey}
-            externalQuery={copilotQuery}
-            onClearExternalQuery={() => setCopilotQuery('')}
-          />
-        )}
       </main>
+
+      {/* Floating Omnipresent Copilot Trigger Button */}
+      <button
+        onClick={() => setIsCopilotOpen(true)}
+        className="fixed bottom-6 right-6 z-40 p-4 rounded-2xl bg-gradient-to-tr from-teal-500 to-emerald-400 text-slate-950 font-bold shadow-2xl shadow-teal-500/30 hover:scale-105 active:scale-95 transition flex items-center gap-2.5 group"
+        aria-label="Open BreatheWise AI Copilot"
+      >
+        <Bot className="w-6 h-6" />
+        <span className="hidden md:inline text-xs font-black tracking-wide">
+          Ask BreatheWise AI
+        </span>
+        <span className="flex h-2 w-2 relative">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-950 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2 w-2 bg-slate-950"></span>
+        </span>
+      </button>
+
+      {/* Slide-over Copilot Drawer */}
+      <CopilotDrawer
+        isOpen={isCopilotOpen}
+        onClose={() => setIsCopilotOpen(false)}
+        metrics={metrics}
+        inversion={inversion}
+        userContext={userContext}
+        apiKey={geminiApiKey}
+        initialQuery={copilotQuery}
+        onClearInitialQuery={() => setCopilotQuery('')}
+      />
+
+      {/* Modals */}
+      <FamilyProfileModal
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+        userContext={userContext}
+        onSaveContext={handleSaveContext}
+      />
+
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        apiKey={geminiApiKey}
+        onSaveApiKey={handleSaveApiKey}
+      />
 
       {/* Footer */}
       <footer className="mt-12 border-t border-slate-800/80 bg-slate-900/60 py-6 text-xs text-slate-400">
@@ -324,21 +364,6 @@ export function App() {
           </div>
         </div>
       </footer>
-
-      {/* Modals */}
-      <FamilyProfileModal
-        isOpen={isProfileOpen}
-        onClose={() => setIsProfileOpen(false)}
-        userContext={userContext}
-        onSaveContext={handleSaveContext}
-      />
-
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        apiKey={geminiApiKey}
-        onSaveApiKey={handleSaveApiKey}
-      />
     </div>
   );
 }
