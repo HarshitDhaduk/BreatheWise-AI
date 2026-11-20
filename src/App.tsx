@@ -13,7 +13,9 @@ import { analyzeThermalInversion } from './utils/inversionEngine';
 
 import { Header } from './components/Header';
 import { SmogDashboard } from './components/SmogDashboard';
+import { ParticleVisualizer } from './components/ParticleVisualizer';
 import { ActionMatrix } from './components/ActionMatrix';
+import { MaskFitTester } from './components/MaskFitTester';
 import { DayScrubber } from './components/DayScrubber';
 import { RoomSimulator } from './components/RoomSimulator';
 import { CommuteSimulator } from './components/CommuteSimulator';
@@ -189,6 +191,12 @@ export function App() {
           onOpenCopilot={handleOpenCopilotWithQuery}
         />
 
+        {/* Real-time Atmospheric Boundary Layer Particle Physics Visualizer */}
+        <ParticleVisualizer
+          pm25={metrics.pm25}
+          isInversion={inversion.isInversionLikely}
+        />
+
         {/* Focus Navigation Bar (Lets user filter or view all seamlessly) */}
         <div className="flex items-center justify-between gap-3 p-2 rounded-2xl bg-slate-900 border border-slate-800">
           <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar">
@@ -255,12 +263,15 @@ export function App() {
 
         {/* Section 1: "What Can I Do Right Now?" Action Matrix */}
         {(activeSection === 'all' || activeSection === 'actions') && (
-          <ActionMatrix
-            metrics={metrics}
-            inversion={inversion}
-            userContext={userContext}
-            onOpenCopilot={handleOpenCopilotWithQuery}
-          />
+          <>
+            <ActionMatrix
+              metrics={metrics}
+              inversion={inversion}
+              userContext={userContext}
+              onOpenCopilot={handleOpenCopilotWithQuery}
+            />
+            <MaskFitTester onOpenCopilot={handleOpenCopilotWithQuery} />
+          </>
         )}
 
         {/* Section 2: 24-Hour Diurnal Inversion Scrubber */}
