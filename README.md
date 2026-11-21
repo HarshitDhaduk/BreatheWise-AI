@@ -69,20 +69,41 @@ flowchart LR
 - Predicts the **Clean-Air Ventilation Window** (typically 12:30 PM – 3:15 PM) when families can safely air out indoor $CO_2$ without letting in dense particulate soot.
 - Features a 24-hour diurnal timeline visualizing the morning inversion peak, midday convective break, and evening cooling trap.
 
-### Module 2: Family Vulnerability & Context Engine
+### Module 2: Pan-India Smog Corridor & Air Quality Geography (`IndiaAirMap`)
+- Complete interactive vector map of India covering **16 major metropolitan hubs** across four distinct geographic zones:
+  - **Indo-Gangetic Plain (Smog Belt)**: Delhi NCR, Lucknow, Kanpur, Patna, Varanasi, Agra, Ludhiana.
+  - **Western Corridor**: Mumbai, Ahmedabad, Pune, Jaipur.
+  - **Southern Tech Hubs**: Bengaluru, Hyderabad, Chennai.
+  - **Eastern & Central**: Kolkata, Bhopal.
+- Regional filter tabs for instant regional comparison and analysis.
+- Animated pulsating AQI markers colored according to EPA / CPCB health hazard tiers.
+- Atmospheric inversion overlay highlighting the **Indo-Gangetic Plain basin trap** between the Himalayas and Central Highlands.
+- Detailed city profile cards with topographic analysis, clean-air windows, and key local emission drivers.
+- One-click **"Set as Active City"** synchronizing real-time telemetry across the entire app.
+
+### Module 3: 3D Delhi NCR Micro-Smog & Inversion Simulator (`Delhi3DSimulator`)
+- Mathematical **3D isometric projection engine** built directly on HTML5 Canvas (zero binary asset bloat, keeping total repository footprint strictly `< 1 MB`).
+- Visualizes localized micro-disparities across **10 Delhi NCR micro-monitoring stations**:
+  - *Anand Vihar (AQI ~465)*, *Jahangirpuri (AQI ~445)*, *Wazirpur (AQI ~440)*, *Rohini (AQI ~410)*, *Okhla Phase 2 (AQI ~395)*, *Punjabi Bagh (AQI ~380)*, *Mayur Vihar (AQI ~350)*, *RK Puram (AQI ~320)*, *Connaught Place (AQI ~280)*, and *Gurugram Cyber City (Haryana Border, AQI ~365)*.
+- Features 3D extruded pillars with height and color mapped to localized AQI, Yamuna river S-curve, base terrain grid, and 3D compass orientation.
+- Interactive 3D camera controls: mouse drag-to-orbit, pitch tilt, zoom in/out, and auto-rotation toggle.
+- **Volumetric Inversion Ceilings**: Toggle between **Nocturnal Trap (<120m)** and **Midday Solar Breakup (450m)** to witness how ground cooling compresses toxic vehicle and biomass plumes.
+- Deep micro-telemetry inspector displaying localized vulnerability factors and primary emission sources.
+
+### Module 4: Family Vulnerability & Context Engine
 - Dynamic household profiling:
   - Counts infants (<2), children (2-12), seniors (65+), and asthmatic/respiratory-vulnerable members.
   - Inspects housing: apartment vs ground house, drafty vs weatherstripped windows, purifier status, cooking fuels, and winter heating types.
   - Analyzes commute: distance, transit mode, departure/return times.
 - Computes a dynamic **Vulnerability Score (1.0 to 5.0)** with prioritized risk factor breakdowns.
 
-### Module 3: Low-Emission Daily Routine Planner
+### Module 5: Low-Emission Daily Routine Planner
 - Compares a standard high-exposure schedule against an optimized **BreatheWise Low-Emission Routine**.
 - Demonstrates modal shifts (switching from solo car / two-wheeler to filtered Metro or electric transit).
 - Suggests smart departure shifts (e.g. 35 minutes earlier or later) to bypass localized diesel soot spikes.
 - Restructures outdoor exercise and school hours away from cold morning inversion peaks to midday or indoor aerobics.
 
-### Module 4: Low-Cost Indoor Air Quality (IAQ) Laboratory
+### Module 6: Low-Cost Indoor Air Quality (IAQ) Laboratory
 - Interactive blueprints and execution guides:
   - **The Corsi-Rosenthal Box**: 4-filter MERV-13 cube with fan shroud achieving 88% $PM_{2.5}$ clearance for $35.
   - **Window Draft Weatherstripping**: Stops uncontrolled winter negative-pressure smog infiltration by up to 65%.
@@ -91,7 +112,7 @@ flowchart LR
   - **NASA CAM-Photosynthesis Sanctuary**: Nighttime oxygen replenishment using Snake Plants and Areca Palms.
   - **Activated Carbon Pre-Filter**: Eliminates crop-burning smoke odors and VOC gases.
 
-### Module 5: Direct Impact & Explainability Engine
+### Module 7: Direct Impact & Explainability Engine
 - Translates behavioral choices into clear, quantifiable outcomes:
   - **$PM_{2.5}$ Particulate Inhalation Avoided ($\mu g$)**
   - **Cigarette Toxic Equivalents Spared (cigs)**
@@ -99,18 +120,18 @@ flowchart LR
   - **$NO_x$ Diesel Gas Prevented ($g$)**
   - **Plain-language causal narrative** explaining the physiological and environmental mechanisms.
 
-### Module 6: GenAI Winter Smog Copilot
+### Module 8: GenAI Winter Smog Copilot
 - Conversational AI powered by **Google Gemini (gemini-1.5-flash / gemini-2.0-flash)** with structured grounding in winter inversion physics and pediatric pulmonary health.
 - Features one-click prompt pills for instant answers.
 - Built-in **Local Smog Intelligence Engine**: If no API key is provided, an intelligent domain reasoning copilot responds with zero latency, ensuring uninterrupted evaluation.
 
-### Module 7: Severe Smog Emergency Lockdown Protocol (AQI 300+)
+### Module 9: Severe Smog Emergency Lockdown Protocol (AQI 300+)
 - Instant one-tap Red Alert protocol:
   - Single-room "Bedroom Sanctuary" isolation protocol.
   - Scientific Mask Guide (N95/FFP2 vs Surgical vs Cloth masks, explaining why woven cloth fails against $PM_{2.5}$).
   - Pediatric emergency checklist.
 
-### Module 8: Community Airshed & Collective Action Hub
+### Module 10: Community Airshed & Collective Action Hub
 - Neighborhood pledges: Zero Waste Burning, Metro Tuesdays, Smog-Free Warmth, and DIY Purifier Donation drives.
 - Tracks collective community emission reductions and participants.
 

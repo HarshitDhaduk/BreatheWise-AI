@@ -24,6 +24,9 @@ import { EmergencySmogBanner } from './components/EmergencySmogBanner';
 import { FamilyProfileModal } from './components/FamilyProfileModal';
 import { SettingsModal } from './components/SettingsModal';
 import { CopilotDrawer } from './components/CopilotDrawer';
+import { IndiaAirMap } from './components/IndiaAirMap';
+import { Delhi3DSimulator } from './components/Delhi3DSimulator';
+import { IndiaCity, DelhiMicroStation } from './data/indiaAirData';
 
 const DEFAULT_USER_CONTEXT: UserContext = {
   family: {
@@ -58,7 +61,9 @@ export function App() {
   const [loading, setLoading] = useState(true);
 
   // Active section view mode for smooth navigation
-  const [activeSection, setActiveSection] = useState<'all' | 'actions' | 'rooms' | 'commute' | 'community'>('all');
+  const [activeSection, setActiveSection] = useState<'all' | 'india-map' | 'delhi-3d' | 'actions' | 'rooms' | 'commute' | 'community'>('all');
+  const [activeCityId, setActiveCityId] = useState<string>('delhi-ncr');
+  const [activeStationId, setActiveStationId] = useState<string>('anand-vihar');
   const [emergencyMode, setEmergencyMode] = useState(false);
   
   // Copilot drawer state
@@ -130,6 +135,28 @@ export function App() {
   const handleOpenCopilotWithQuery = (query: string) => {
     setCopilotQuery(query);
     setIsCopilotOpen(true);
+  };
+
+  const handleSelectCity = (city: IndiaCity) => {
+    setActiveCityId(city.id);
+    setSelectedLocation({
+      name: `${city.name} (${city.state})`,
+      country: 'India',
+      latitude: city.latitude,
+      longitude: city.longitude,
+      description: city.geographicTopography,
+    });
+  };
+
+  const handleSelectDelhiStation = (station: DelhiMicroStation) => {
+    setActiveStationId(station.id);
+    setSelectedLocation({
+      name: station.name,
+      country: 'India',
+      latitude: station.latitude,
+      longitude: station.longitude,
+      description: station.localVulnerabilityFactor,
+    });
   };
 
   if (!metrics || !inversion) {
@@ -211,6 +238,32 @@ export function App() {
               Full Daily Copilot
             </button>
             <button
+              onClick={() => setActiveSection('india-map')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 ${
+                activeSection === 'india-map'
+                  ? 'bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              <span>India Air Map</span>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded font-extrabold ${
+                activeSection === 'india-map' ? 'bg-slate-950/20 text-slate-950' : 'bg-teal-500/10 text-teal-300'
+              }`}>16 Cities</span>
+            </button>
+            <button
+              onClick={() => setActiveSection('delhi-3d')}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap flex items-center gap-1.5 ${
+                activeSection === 'delhi-3d'
+                  ? 'bg-teal-500 text-slate-950 shadow-md shadow-teal-500/20'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              <span>Delhi 3D Simulation</span>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded font-extrabold ${
+                activeSection === 'delhi-3d' ? 'bg-slate-950/20 text-slate-950' : 'bg-emerald-500/10 text-emerald-300'
+              }`}>3D</span>
+            </button>
+            <button
               onClick={() => setActiveSection('actions')}
               className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition whitespace-nowrap ${
                 activeSection === 'actions'
@@ -260,6 +313,25 @@ export function App() {
             <span className="hidden sm:inline">Ask Copilot</span>
           </button>
         </div>
+
+        {/* Section: Pan-India Smog Corridor & Air Quality Geography */}
+        {(activeSection === 'all' || activeSection === 'india-map') && (
+          <IndiaAirMap
+            onSelectCity={handleSelectCity}
+            onOpenDelhi3D={() => setActiveSection('delhi-3d')}
+            onOpenCopilot={handleOpenCopilotWithQuery}
+            activeCityId={activeCityId}
+          />
+        )}
+
+        {/* Section: 3D Delhi NCR Micro-Station & Inversion Simulation */}
+        {(activeSection === 'all' || activeSection === 'delhi-3d') && (
+          <Delhi3DSimulator
+            onSelectStation={handleSelectDelhiStation}
+            onOpenCopilot={handleOpenCopilotWithQuery}
+            activeStationId={activeStationId}
+          />
+        )}
 
         {/* Section 1: "What Can I Do Right Now?" Action Matrix */}
         {(activeSection === 'all' || activeSection === 'actions') && (
